@@ -122,6 +122,7 @@ func TestProvider_HasChildResources(t *testing.T) {
 		"azuredevops_workitem",
 		"azuredevops_feed",
 		"azuredevops_feed_permission",
+		"azuredevops_serviceendpoint_project_permissions", // Added new resource
 	}
 
 	resources := azuredevops.Provider().ResourcesMap

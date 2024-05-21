@@ -121,6 +121,7 @@ func Provider() *schema.Provider {
 			"azuredevops_servicehook_storage_queue_pipelines":    servicehook.ResourceServicehookStorageQueuePipelines(),
 			"azuredevops_feed":                                   feed.ResourceFeed(),
 			"azuredevops_feed_permission":                        feed.ResourceFeedPermission(),
+			"azuredevops_serviceendpoint_project_permissions":    serviceendpoint.ResourceServiceEndpointProjectPermissions(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"azuredevops_build_definition":           build.DataBuildDefinition(),
