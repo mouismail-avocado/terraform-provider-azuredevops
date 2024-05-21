@@ -60,6 +60,13 @@ func resourceServiceEndpointProjectPermissionsCreate(d *schema.ResourceData, m i
 
 		// Logic to share service connection with specified projects
 		// including handling optional service_endpoint_name and description
+    // parameters
+    sharedServiceEndpoint := serviceendpoint.SharedServiceEndpoint{
+      ProjectReference: &serviceendpoint.ProjectReference{
+        Id: &projectID,
+      },
+      ServiceEndpointName: &serviceEndpointName,
+      Description: &description,
 	}
 
 	d.SetId(fmt.Sprintf("%s:%s", serviceEndpointID, projectID))
@@ -67,16 +74,71 @@ func resourceServiceEndpointProjectPermissionsCreate(d *schema.ResourceData, m i
 }
 
 func resourceServiceEndpointProjectPermissionsRead(d *schema.ResourceData, m interface{}) error {
-	// Logic to read the shared service connection permissions
-	return nil
+  // Set the ID to the service endpoint ID and project ID
+  serviceEndpointID, projectID := converter.SplitID(d.Id())
+  d.Set("serviceendpoint_id", serviceEndpointID)
+  d.Set("project_id", projectID)
+
+  // Get the shared service endpoint
+  sharedServiceEndpoint, err := client.GetClient().ServiceEndpoint.GetSharedServiceEndpoint(serviceendpoint.GetSharedServiceEndpointArgs{
+    ServiceEndpointId: &serviceEndpointID,
+    ProjectId: &projectID,
+  })
+
+  if err != nil {
+    return err
+  }
+
+  // Set the project reference
+  projectReference := map[string]interface{}{
+    "project_id": projectID,
+    "service_endpoint_name": sharedServiceEndpoint.ServiceEndpointName,
+    "description": sharedServiceEndpoint.Description,
+  }
+
+  d.Set("project_reference", projectReference)
+  return nil
 }
 
 func resourceServiceEndpointProjectPermissionsUpdate(d *schema.ResourceData, m interface{}) error {
-	// Logic to update the shared service connection permissions
-	return resourceServiceEndpointProjectPermissionsRead(d, m)
+  // Update the project reference
+  projectReference := d.Get("project_reference").([]interface{})[0].(map[string]interface{})
+  serviceEndpointName := projectReference["service_endpoint_name"].(string)
+
+  // Update the shared service endpoint
+  serviceEndpointID, projectID := converter.SplitID(d.Id())
+  sharedServiceEndpoint := serviceendpoint.SharedServiceEndpoint{
+    ProjectReference: &serviceendpoint.ProjectReference{
+      Id: &projectID,
+    },
+    ServiceEndpointName: &serviceEndpointName,
+  }
+
+  _, err := client.GetClient().ServiceEndpoint.UpdateSharedServiceEndpoint(serviceendpoint.UpdateSharedServiceEndpointArgs{
+    ServiceEndpointId: &serviceEndpointID,
+    ProjectId: &projectID,
+    SharedServiceEndpoint: &sharedServiceEndpoint,
+  })
+
+  if err != nil {
+    return err
+  }
+
+  return resourceServiceEndpointProjectPermissionsRead(d, m)
 }
 
 func resourceServiceEndpointProjectPermissionsDelete(d *schema.ResourceData, m interface{}) error {
 	// Logic to unshare the service connection from the projects
+	serviceEndpointID, projectID := converter.SplitID(d.Id())
+	_, err := client.GetClient().ServiceEndpoint.DeleteSharedServiceEndpoint(serviceendpoint.DeleteSharedServiceEndpointArgs{
+		ServiceEndpointId: &serviceEndpointID,
+		ProjectId: &projectID,
+	})
+
+	if err != nil {
+		return err
+	}
+
+
 	return nil
 }
