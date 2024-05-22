@@ -13,6 +13,7 @@ import (
 	"github.com/microsoft/terraform-provider-azuredevops/azuredevops/internal/utils/datahelper"
 )
 
+// This function constructs a Terraform configuration for a service endpoint with permissions
 func hclServiceEndpointPermissions(projectName string, serviceEndpointName string, permissions map[string]map[string]string) string {
 	rootPermissions := datahelper.JoinMap(permissions["root"], "=", "\n")
 	serviceEndpointPermissions := datahelper.JoinMap(permissions["service_endpoint"], "=", "\n")
@@ -57,6 +58,7 @@ resource "azuredevops_serviceendpoint_permissions" "serviceendpoint-permissions"
 		serviceEndpointPermissions)
 }
 
+// Test case for creating and setting permissions for a service endpoint
 func TestAccServiceEndpointPermissions_SetPermissions(t *testing.T) {
 	projectName := testutils.GenerateResourceName()
 	serviceEndpointName := testutils.GenerateResourceName()
@@ -112,6 +114,7 @@ func TestAccServiceEndpointPermissions_SetPermissions(t *testing.T) {
 	})
 }
 
+// Test case for updating permissions for a service endpoint
 func TestAccServiceEndpointPermissions_UpdatePermissions(t *testing.T) {
 	projectName := testutils.GenerateResourceName()
 	serviceEndpointName := testutils.GenerateResourceName()
